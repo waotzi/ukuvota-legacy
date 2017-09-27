@@ -104,12 +104,18 @@
             'votingInterval': buildOutput(this.voting.days, this.voting.hours, this.voting.minutes, 0),
             'negativeScoreWeight': this.negativeScoreWeight,
             'proposals': {
-              'Change nothing': 'keep things the way they are',
-              'Repeat process': 'reapeat the process and look for other options'
-            },
-            'emojis': {
-              'Change nothing': 0,
-              'Repeat process': 0
+              0: {
+                'title': 'Change nothing',
+                'titleTimestamp': Date.now(),
+                'discussion': 'keep things the way they are',
+                'discussionTimestamp': Date.now()
+              },
+              1: {
+                'title': 'Repeat process',
+                'titleTimestamp': Date.now(),
+                'discussion': 'Repeat the process and look for other options',
+                'discussionTimestamp': Date.now()
+              }
             },
             'votes': {
   

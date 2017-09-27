@@ -7,9 +7,10 @@ Proposal:
   exists: Der Vorschlag existiert bereits
   empty: Der Vorschlag ist leer
   add: Vorschlag hinzufügen
+  title: Vorschlag
 
-Proposals:
-  current: Aktuelle Vorschläge
+Proposals: Vorschläge
+Discussion: Diskussion
 
 Voting:
   time:

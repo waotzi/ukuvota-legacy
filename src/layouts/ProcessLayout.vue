@@ -33,9 +33,7 @@
   import {
     QCard,
     QCardMain,
-    QField,
-    QItem,
-    QItemMain
+    QField
   } from 'quasar'
   import {
     getTopic
@@ -51,9 +49,7 @@
       NegativeScoreInfo,
       QCard,
       QCardMain,
-      QField,
-      QItem,
-      QItemMain
+      QField
     },
     methods: {
       timer () {

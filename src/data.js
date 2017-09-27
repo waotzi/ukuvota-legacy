@@ -26,11 +26,35 @@ export const getTopic = (id) => {
   })
 }
 
-export const setProposal = (id, title, description) => {
+export const addProposal = (id, title, discussion) => {
   return getTopic(id).then(topic => {
     // add proposal
-    topic.emojis[title] = 0
-    topic.proposals[title] = description
+    let index = Object.keys(topic.proposals).length + 1
+    topic.proposals[index] = {}
+    topic.proposals[index].title = title
+    topic.proposals[index].titleTimestamp = Date.now()
+    topic.proposals[index].discussion = discussion
+    topic.proposals[index].discussionTimestamp = Date.now()
+
+    // put them back
+    return db.put(topic)
+  })
+}
+
+export const updateProposal = (id, index, title, discussion) => {
+  return getTopic(id).then(topic => {
+    // add proposal
+    let proposal = topic.proposals[index]
+    if (title !== false) {
+      proposal.title = title
+      proposal.titleTimestamp = Date.now()
+    }
+
+    if (discussion !== false) {
+      proposal.discussion = discussion
+      proposal.discussionTimestamp = Date.now()
+    }
+
     // put them back
     return db.put(topic)
   })

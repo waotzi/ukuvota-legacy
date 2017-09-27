@@ -7,9 +7,10 @@ Proposal:
   exists: The proposal already exists'
   empty: Proposal is empty
   add: Add Proposal
+  title: Proposal
 
-Proposals:
-  current: Current Proposals
+Proposals: Proposals
+Discussion: Discussion
 
 Voting:
   time:

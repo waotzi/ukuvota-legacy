@@ -1,51 +1,39 @@
 <template>
   <process-layout>
-    <q-card style="max-width: 700px; text-align: left;">
-      <q-card-main>
-        <h5><q-field :label="$t('Proposal.add')"></q-field></h5>
-        <q-field :error-label="getProposalError()" >
-          <q-input
-            v-model="newProposal"
-            float-label="Proposal"
-            :error="proposalExists || proposalEmpty"
-          />
-        </q-field>
-        <q-input v-model="proposalDescription" :float-label="$t('DescriptionLabel')" />
-        <div class="row justify-end">
-          <q-btn @click="addProposal">{{ $t('Add') }}</q-btn>
+    <div style="max-width: 700px; text-align: left; padding: 1em;">
+      <h5><q-field :label="$t('Proposals')"></q-field></h5>
+      <br/>
+      <div v-for="(obj, index) in proposals" :key="index">
+        <div v-if="obj.title !== '_'">
+          <q-input @change="updateProposalTitle(obj.title, index)" v-model="obj.title" color="deep-orange-4" class="nomargin" inverted type="text"/>
+          <Pad nomargin="true" :data="obj.discussion" :infoLabel="$t('Discussion')"></Pad>
         </div>
-      </q-card-main>
-    </q-card>
-    <q-card style="max-width: 700px; text-align: left;">
-      <q-card-main>
-        <h5><q-field :label="$t('Proposals.current')"></q-field></h5>
-      </q-card-main>
-      <q-list>
-        <div v-for="(description, title) in proposals" :key="title">
-          <q-item v-if="title !== '_'">
-            <q-item-main  :label="title" :sublabel="description"></q-item-main>
-          </q-item>
-        </div>
-      </q-list>
-    </q-card>
+        </br>
+      </div>
+      <br/>
+      <div style="position: fixed; bottom: 1em; right: 1em;">
+        <q-btn color="primary" round @click="addProposal">
+          <q-icon name="add"/>
+        </q-btn>
+      </div>
+    </div>
   </process-layout>
 </template>
 <script>
 import ProcessLayout from 'layouts/ProcessLayout'
-import { QBtn, QCard, QCardMain, QField, QInput, QItem, QItemMain, QList } from 'quasar'
-import { getProposals, setProposal } from 'src/data'
+import { QBtn, QField, QIcon, QInput, QTooltip } from 'quasar'
+import { getProposals, addProposal, updateProposal } from 'src/data'
+import Pad from '@/Pad'
 
 export default {
   components: {
+    Pad,
     ProcessLayout,
     QBtn,
-    QCard,
-    QCardMain,
     QField,
+    QIcon,
     QInput,
-    QItem,
-    QItemMain,
-    QList
+    QTooltip
   },
   mounted () {
     this.id = this.$route.params.id
@@ -54,54 +42,59 @@ export default {
   methods: {
     updateProposals () {
       getProposals(this.id).then((proposals) => {
-        this.proposals = proposals
+        for (let index in proposals) {
+          if (this.proposals[index] === undefined) {
+            this.proposals[index] = {
+              'title': '',
+              'titleTimestamp': 0,
+              'description': '',
+              'descriptionTimestamp': 0
+            }
+          }
+          if (this.proposals[index].titleTimestamp < proposals[index].titleTimestamp) {
+            this.proposals[index].title = proposals[index].title
+            this.proposals[index].titleTimestamp = proposals[index].titleTimestamp
+          }
+          if (this.proposals[index].discussionTimestamp < proposals[index].discussionTimestamp) {
+            this.proposals[index].discussion = proposals[index].discussion
+            this.proposals[index].discussionTimestamp = proposals[index].discussionTimestamp
+          }
+        }
+        this.$forceUpdate()
       })
+    },
+    updateProposal (index, title, discussion) {
+      updateProposal(this.id, index, title, discussion).then(() => {
+        this.updateProposals()
+      })
+    },
+    updateProposalTitle (newVal, index) {
+      this.updateProposal(index, newVal, false)
+    },
+    updateProposalDiscussion (newVal, index) {
+      this.updateProposal(index, false, newVal)
     },
     getProposalError () {
       if (this.proposalExists) return this.$t('Proposal.exists')
       else if (this.proposalEmpty) return this.$t('Proposal.empty')
     },
     addProposal () {
-      let error = false
-      // error check
-      if (this.newProposal.replace(/\s/g, '').length <= 0) {
-        this.proposalEmpty = true
-        this.proposalExists = false
-        error = true
-      }
-      else {
-        this.proposalEmpty = false
-        if (typeof this.proposals[this.newProposal] !== 'undefined') {
-          this.proposalExists = true
-          error = true
-        }
-        else {
-          this.proposalExists = false
-        }
-      }
-      if (!error) {
-        let t = this
-        setProposal(this.id, this.newProposal, this.proposalDescription).then(() => {
-          t.newProposal = ''
-          t.proposalDescription = ''
-          this.updateProposals()
-        })
-      }
+      addProposal(this.id, '', '').then(() => {
+        this.updateProposals()
+      })
     }
   },
   data () {
     return {
-      proposals: '',
-      urlpath: window.location.href,
-      newProposal: '',
-      proposalEmpty: false,
-      proposalExists: false,
-      proposalDescription: ''
+      proposals: {},
+      urlpath: window.location.href
     }
   }
 }
 
 </script>
 <style lang="stylus">
-
+  .nomargin {
+    margin: 0
+  }
 </style>
