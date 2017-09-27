@@ -1,8 +1,14 @@
 import PouchDB from 'pouchdb'
 
 const BACKEND_URL = location.protocol + '//' + location.host + '/db'
-let db = new PouchDB(BACKEND_URL + '/topics')
+let db = new PouchDB('topics')
 window.PouchDB = PouchDB
+
+db.changes().on('change', () => {
+  console.log('Ch-Ch-Changes')
+})
+
+db.replicate.to(BACKEND_URL + '/topics')
 
 // set topic in db
 export const setTopic = (topic) => {
@@ -12,6 +18,7 @@ export const setTopic = (topic) => {
       return db.put(topic)
     }).then().catch(err => {
       console.log(err)
+      if (err.status === 500) return 500
       return -1
     })
   })

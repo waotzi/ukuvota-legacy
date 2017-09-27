@@ -64,3 +64,8 @@ Time:
   minute: minute
   seconds: seconds
   second: second
+
+
+Server:
+  unkownError: Something went wrong. server down?
+  privateModeError: IndexedDB does not support private mode in web browser... I know this sucks. Maybe join the team and help make this app better?

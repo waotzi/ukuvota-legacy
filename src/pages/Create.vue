@@ -22,7 +22,10 @@
           <q-btn @click="submit" icon="arrow forward">{{ $t('Next') }}</q-btn>
         </div>
         <div style="color: red; text-align: right" v-if="serverError">
-          something went wrong. server down?
+          {{ $t('Server.unkwonError') }}
+        </div>
+        <div style="color: red; text-align: right" v-if="privateModeError">
+          {{ $t('Server.privateModeError') }}
         </div>
       </q-card-main>
     </q-card>
@@ -123,9 +126,12 @@
           }
           let t = this
           setTopic(newTopic).then(log => {
+            console.log(log)
             if (log === -1) this.serverError = true
+            if (log === 500) this.privateModeError = true
             else {
               this.serverError = false
+              this.privateModeError = false
               t.$router.push({ name: 'collect', params: { id } })
             }
           })
@@ -139,6 +145,7 @@
         topicMissing: false,
         visible: false,
         serverError: false,
+        privateModeError: false,
         proposal: {
           days: 2,
           hours: 0,
