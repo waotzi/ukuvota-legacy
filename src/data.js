@@ -1,21 +1,31 @@
 import PouchDB from 'pouchdb'
 
-const BACKEND_URL = location.protocol + '//' + location.host + '/db'
-let db = new PouchDB('topics')
 window.PouchDB = PouchDB
+const BACKEND_URL = location.protocol + '//' + location.host + '/db'
+let localDB = new PouchDB('topics')
+let remoteDB = new PouchDB(BACKEND_URL + '/topics')
 
-db.changes().on('change', () => {
-  console.log('Ch-Ch-Changes')
+localDB.sync(remoteDB, {
+  live: true,
+  retry: true
+}).on('change', change => {
+  console.log(change)
+  // yay, we're in sync!
+}).on('paused', function (info) {
+  // replication was paused, usually because of a lost connection
+}).on('active', function (info) {
+  // replication was resumed
+}).on('error', err => {
+  console.log('there is an error', err)
+  // boo, we hit an error!
 })
-
-db.replicate.to(BACKEND_URL + '/topics')
 
 // set topic in db
 export const setTopic = (topic) => {
-  return db.put(topic).then().catch(() => {
-    return db.get(topic._id).then(doc => {
+  return localDB.put(topic).then().catch(() => {
+    return localDB.get(topic._id).then(doc => {
       topic._rev = doc._rev
-      return db.put(topic)
+      return localDB.put(topic)
     }).then().catch(err => {
       console.log(err)
       if (err.status === 500) return 500
@@ -25,7 +35,7 @@ export const setTopic = (topic) => {
 }
 
 export const getTopic = (id) => {
-  return db.get(id).then(doc => {
+  return localDB.get(id).then(doc => {
     return doc
   }).then().catch(err => {
     console.log(err)
@@ -44,7 +54,7 @@ export const addProposal = (id, title, discussion) => {
     topic.proposals[index].discussionTimestamp = Date.now()
 
     // put them back
-    return db.put(topic)
+    return localDB.put(topic)
   })
 }
 
@@ -63,7 +73,7 @@ export const updateProposal = (id, index, title, discussion) => {
     }
 
     // put them back
-    return db.put(topic)
+    return localDB.put(topic)
   })
 }
 
@@ -83,7 +93,7 @@ export const setVotes = (id, name, emojis) => {
     if (topic.votes[name] === undefined) topic.votes[name] = emojis
     else return -2
     // put them back
-    return db.put(topic)
+    return localDB.put(topic)
   }).then().catch(err => {
     console.log(err)
     return -1

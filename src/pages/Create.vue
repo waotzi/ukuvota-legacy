@@ -126,7 +126,6 @@
           }
           let t = this
           setTopic(newTopic).then(log => {
-            console.log(log)
             if (log === -1) this.serverError = true
             if (log === 500) this.privateModeError = true
             else {
